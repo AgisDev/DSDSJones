@@ -1,8 +1,8 @@
 import discord
 import asyncio
 import time
-from Commands import Verify, CreateReactRoles, Say
-from Events import LogDeletedOrEditedMessages
+from Commands import Verify, CreateReactRoles, Say, FindIncorrectNames
+from Events import LogDeletedOrEditedMessages, LogChatInLeaderboard, LogMessage
 
 #--disable the creation of pycache
 import sys
@@ -85,8 +85,10 @@ async def on_message(messageObj):
     if messageObj.author == client.user:
         return
     
+    await LogChatInLeaderboard.logMessageToLeaderboard(client, messageObj)
+    await LogMessage.logMessage(client, messageObj)
     
-    messageContent = messageObj.content
+    messageContent = messageObj.content.lower()
     
     match messageContent:
         case "m?create cq buttons":
@@ -109,6 +111,12 @@ async def on_message(messageObj):
             await messageObj.reply("Type a status.")
             givenStatus = await client.wait_for("message", check=(lambda m: m.author == messageObj.author), timeout=60)
             await client.change_presence(activity=discord.Game(name=givenStatus.content))
+            
+        case "m?findincorrectnames":
+            await FindIncorrectNames.findIncorrectNames(client, messageObj)
+            
+        case "chat leaderboard":
+            await LogChatInLeaderboard.displayLeaderboard(client, messageObj)
 
 
 
@@ -121,7 +129,6 @@ reactionRoleCoolDown = {}
 async def on_raw_reaction_add(payload):
     global reactionRoleCoolDown
     
-    print(reactionRoleCoolDown)
     #if the reaction is added by the bot, ignore
     if payload.member == client.user:
         return
@@ -156,7 +163,6 @@ async def on_raw_reaction_add(payload):
             emojiInField = field.value.split(" - ")[0]
             if discord.PartialEmoji.from_str(emojiInField) == payload.emoji: #--check to see if emoji is valid
                 
-                print(field.value.split(" - ")[1])
                 givenRole = fetchedGuild.get_role(int(field.value.split(" - ")[1][3:-1]))#--get role from server, role id is interpreted from format like this "<@&1142512701269090354>"
                 
                 if fetchedMessage.embeds[0].description != None: #--when a unique react role is made, only one role can be taken at a time
@@ -198,12 +204,12 @@ async def on_raw_reaction_remove(payload):
     
 @client.event
 async def on_message_delete(deletedMessage):
-    LogDeletedOrEditedMessages.logDeletedMessage(client, deletedMessageObj=deletedMessage)
+    await LogDeletedOrEditedMessages.logDeletedMessage(client, deletedMessageObj=deletedMessage)
     
     
 @client.event
 async def on_message_edit(beforeEdit, afterEdit):
-    LogDeletedOrEditedMessages.logEditedMessage(client, beforeEdit, afterEdit)
+    await LogDeletedOrEditedMessages.logEditedMessage(client, beforeEdit, afterEdit)
     
         
             
@@ -219,4 +225,4 @@ async def on_member_join(member):
         
         
 
-client.run('NjA2OTcxNzI1NDg1MzA5OTgy.GOYNaZ.vVlfB_2wrp5-I35m3xRP73Bb75nNGdszRu5Vwk')
+client.run('NjA2OTcxNzI1NDg1MzA5OTgy.Gg4I9J.FlJ0Vk-sJEHTBal4K0gh-DYdK7zA4Cf-_KdGHM')

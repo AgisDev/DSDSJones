@@ -12,7 +12,7 @@ async def verify(client, messageObj):
         
         if ckRole in messageObj.author.roles:
             await messageObj.reply("You're already verified.")
-            await messageObj.channel.send(file=discord.File("Resources\VerifiedImage.png"))
+            await messageObj.channel.send(file=discord.File("Resources/VerifiedImage.png"))
         #-------------------------------------------------------------------------------------------------------------------
         else:
             await messageObj.reply("Please send your first name")
@@ -44,7 +44,7 @@ async def verify(client, messageObj):
                 except:
                     await messageObj.reply("Missing nickname permissions.")
                     
-                await messageObj.channel.send(file=discord.File("Resources\VerifiedImage.png"))
+                await messageObj.channel.send(file=discord.File("Resources/VerifiedImage.png"))
             else:
                 await messageObj.reply("Reuse the m?verify command to start over.")
                 
